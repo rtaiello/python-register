@@ -9,23 +9,20 @@ extern "C" {
 #include <Python.h>
 
 /*
-
 A mapping function which adjusts coordinates outside the domain in the following way:
-   
+
    'n' nearest : sampler the nearest valid coordinate.
-
    'r' reflect : reflect the coordinate into the boundary.
-
    'w' wrap : wrap the coordinate around the appropriate axis.
 */
 
 int map(int *coords, int rows, int cols, char mode)
   {
-    switch (mode) 
+    switch (mode)
       {
-	
+
       case 'c': /* constant */
-	
+
 	if (coords[0] < 0) return 0;
 	if (coords[1] < 0) return 0;
 
@@ -76,7 +73,7 @@ int map(int *coords, int rows, int cols, char mode)
 
 	break;
     }
-    
+
     return 1;
   }
 
@@ -107,7 +104,7 @@ int nearest(numpyArray<double> array0,
         	coords[0] = (int)warp[0][i][j];
         	coords[1] = (int)warp[1][i][j];
 
-		if ( not map(coords, rows, cols, mode) ) 
+		if ( not map(coords, rows, cols, mode) )
 		  {
 		    result[i][j] = cvalue;
 		  }
@@ -122,8 +119,8 @@ int nearest(numpyArray<double> array0,
 }
 
 
-/* 
-   bilinear interpolator 
+/*
+   bilinear interpolator
  */
 
 int bilinear(numpyArray<double> array0,
@@ -147,7 +144,7 @@ int bilinear(numpyArray<double> array0,
     double w1 = 0.0;
     double w2 = 0.0;
     double w3 = 0.0;
-    
+
     int tl[2] = {0, 0};
     int tr[2] = {0, 0};
     int ll[2] = {0, 0};
@@ -163,16 +160,16 @@ int bilinear(numpyArray<double> array0,
 	  /* Floating point coordinates */
 	  fi = warp[0][i][j];
 	  fj = warp[1][i][j];
-		
+
 	  /* Integer component */
 	  di = (double)((int)(warp[0][i][j]));
 	  dj = (double)((int)(warp[1][i][j]));
-	
+
 	  /* Defined sampling coordinates */
-	  
+
 	  tl[0] = (int)fi;
 	  tl[1] = (int)fj;
-	
+
 	  tr[0] = tl[0];
 	  tr[1] = tl[1] + 1;
 
@@ -181,25 +178,25 @@ int bilinear(numpyArray<double> array0,
 
 	  lr[0] = tl[0] + 1;
 	  lr[1] = tl[1] + 1;
-	  
+
 	  w0 = 0.0;
-	  if ( map(tl, rows, cols, mode) ) 
+	  if ( map(tl, rows, cols, mode) )
 	    w0 = ((dj+1-fj)*(di+1-fi))*image[tl[0]][tl[1]];
-	  			  
+
 	  w1 = 0.0;
 	  if ( map(tr, rows, cols, mode) )
-	    w1 = ((fj-dj)*(di+1-fi))*image[tr[0]][tr[1]]; 
-		  
+	    w1 = ((fj-dj)*(di+1-fi))*image[tr[0]][tr[1]];
+
 	  w2 = 0.0;
 	  if ( map(ll, rows, cols, mode) )
-	    w2 = ((dj+1-fj)*(fi-di))*image[ll[0]][ll[1]];  
-		  
+	    w2 = ((dj+1-fj)*(fi-di))*image[ll[0]][ll[1]];
+
 	  w3 = 0.0;
 	  if ( map(lr, rows, cols, mode) )
-	    w3 = ((fj-dj)*(fi-di))*image[lr[0]][lr[1]];  
-		  
+	    w3 = ((fj-dj)*(fi-di))*image[lr[0]][lr[1]];
+
 	  result[i][j] = w0 + w1 + w2 + w3;
-	        	
+
         }
     }
 
@@ -236,7 +233,7 @@ int cubicConvolution(numpyArray<double> array0,
     double c1;
     double c2;
     double c3;
-    
+
     for (int i = 0; i < image.getShape(0); i++)
     {
         for (int j = 0; j < image.getShape(1); j++)
@@ -248,7 +245,7 @@ int cubicConvolution(numpyArray<double> array0,
                  ( dj < cols-2 && dj >= 2 ) )
             {
                 xShift = warp[1][i][j] - dj;
-                yShift = warp[0][i][j] - di; 
+                yShift = warp[0][i][j] - di;
                 xArray0 = -(1/2.0)*pow(xShift, 3) + pow(xShift, 2) - (1/2.0)*xShift;
                 xArray1 = (3/2.0)*pow(xShift, 3) - (5/2.0)*pow(xShift, 2) + 1;
                 xArray2 = -(3/2.0)*pow(xShift, 3) + 2*pow(xShift, 2) + (1/2.0)*xShift;
@@ -256,7 +253,7 @@ int cubicConvolution(numpyArray<double> array0,
                 yArray0 = -(1/2.0)*pow(yShift, 3) + pow(yShift, 2) - (1/2.0)*yShift;
                 yArray1 = (3/2.0)*pow(yShift, 3) - (5/2.0)*pow(yShift, 2) + 1;
                 yArray2 = -(3/2.0)*pow(yShift, 3) + 2*pow(yShift, 2) + (1/2.0)*yShift;
-                yArray3 = (1/2.0)*pow(yShift, 3) - (1/2.0)*pow(yShift, 2);                
+                yArray3 = (1/2.0)*pow(yShift, 3) - (1/2.0)*pow(yShift, 2);
                 c0 = xArray0 * image[di-1][dj-1] + xArray1 * image[di-1][dj+0] + xArray2 * image[di-1][dj+1] + xArray3 * image[di-1][dj+2];
                 c1 = xArray0 * image[di+0][dj-1] + xArray1 * image[di+0][dj+0] + xArray2 * image[di+0][dj+1] + xArray3 * image[di+0][dj+2];
                 c2 = xArray0 * image[di+1][dj-1] + xArray1 * image[di+1][dj+0] + xArray2 * image[di+1][dj+1] + xArray3 * image[di+1][dj+2];
@@ -273,13 +270,30 @@ int cubicConvolution(numpyArray<double> array0,
     return 0;
 }
 
+
 static PyMethodDef sampler_methods[] = {
     {NULL, NULL}
 };
 
-void initlibsampler()
+static struct PyModuleDef cModPyDem =
 {
-    (void) Py_InitModule("libsampler", sampler_methods);
+    PyModuleDef_HEAD_INIT,
+    "cModPyDem", /* name of module */
+    "",          /* module documentation, may be NULL */
+    -1,          /* size of per-interpreter state of the module, or -1 if the module keeps state in global variables. */
+    sampler_methods
+};
+
+PyMODINIT_FUNC PyInit_cModPyDem(void)
+{
+    return PyModule_Create(&cModPyDem);
 }
+
+
+//
+//void initlibsampler()
+//{
+//    (void) Py_InitModule("libsampler", sampler_methods);
+//}
 
 } // end extern "C"

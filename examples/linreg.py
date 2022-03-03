@@ -10,15 +10,17 @@ import scipy.misc as misc
 from imreg import register, model, metric
 from imreg.samplers import sampler
 
+import matplotlib.pyplot as plt
+
 # Form some test data (lena, lena rotated 20 degrees)
-image = misc.lena()
+image = plt.imread('data/cameraman.png')
 template = nd.rotate(image, 20, reshape=False)
 
 # Form the affine registration instance.
 affine = register.Register(
     model.Affine,
     metric.Residual,
-    sampler.CubicConvolution
+    sampler.Spline
     )
 
 # Coerce the image data into RegisterData.

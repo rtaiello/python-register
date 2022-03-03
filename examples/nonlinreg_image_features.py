@@ -9,7 +9,6 @@ define a custom kernel is shown.
 """
 
 import numpy as np
-import yaml
 
 import matplotlib.pyplot as plt
 

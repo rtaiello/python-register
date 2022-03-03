@@ -1,13 +1,14 @@
 """ A collection of samplers"""
+import os
 
 import numpy as np
 import scipy.ndimage as nd
 
 from numpy.ctypeslib import load_library
-from numpyctypes import c_ndarray
-import ctypes 
-
-libsampler = load_library('libsampler', __file__)
+from imreg.samplers.numpyctypes import c_ndarray
+import ctypes
+dir_path = "/user/rtaiello/home/PycharmProjects/python-register/build/lib.linux-x86_64-3.7/imreg/samplers/libsampler.cpython-37m-x86_64-linux-gnu.so"
+libsampler = ctypes.CDLL(dir_path )
 
 # Configuration for the extrapolation mode and fill value.
 EXTRAPOLATION_MODE = 'c'
@@ -121,7 +122,7 @@ class Nearest(Sampler):
             arg0, 
             arg1, 
             arg2, 
-            ctypes.c_char(EXTRAPOLATION_MODE[0]),
+            ctypes.c_char(EXTRAPOLATION_MODE[0].encode("utf-8")),
             ctypes.c_double(EXTRAPOLATION_CVALUE)
             )
 
@@ -171,7 +172,7 @@ class Bilinear(Sampler):
             arg0, 
             arg1, 
             arg2,
-            ctypes.c_char(EXTRAPOLATION_MODE[0]),
+            ctypes.c_char(EXTRAPOLATION_MODE[0].encode("utf-8")),
             ctypes.c_double(EXTRAPOLATION_CVALUE)
             )
         

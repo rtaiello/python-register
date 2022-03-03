@@ -373,17 +373,9 @@ class Register(object):
             bestStep = searchStep if bestStep is None else bestStep
 
             if verbose:
-                print ('{0}\n'
-                       'iteration  : {1} \n'
-                       'parameters : {2} \n'
-                       'error      : {3} \n'
-                       '{0}'
-                      ).format(
-                            '='*80,
-                            itteration,
-                            ' '.join( '{0:3.2f}'.format(param) for param in searchStep.p),
-                            searchStep.error
-                            )
+                print(
+                    f"\n iteration  : {itteration} \n parameters : {[param for param in searchStep.p]} \n error      : {searchStep.error} \n"
+                )
 
             # Append the search step to the search.
             search.append(searchStep)

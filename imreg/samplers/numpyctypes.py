@@ -74,11 +74,11 @@ def c_ndarray(a, dtype = None, ndim = None, shape = None, requirements = None):
 
     if ndim is not None:
         if array.ndim != ndim:
-            raise TypeError, "Array has wrong number of axes"
+            raise TypeError("Array has wrong number of axes")
 
     if shape is not None:
         if array.shape != shape:
-            raise TypeError, "Array has wrong shape"
+            raise TypeError("Array has wrong shape")
 
     # Define a class that serves as interface of an ndarray to ctypes.
     # Part of the type depends on the array's dtype.
@@ -94,7 +94,7 @@ def c_ndarray(a, dtype = None, ndim = None, shape = None, requirements = None):
                    ("shape" , C.POINTER(C.c_long)),
                    ("strides", C.POINTER(C.c_long))]
     else:
-        raise TypeError, "dtype of input ndarray not supported"
+        raise TypeError("dtype of input ndarray not supported")
 
     # Instantiate the interface class and attach the ndarray's internal info.
     # Ctypes does automatic conversion between (c_long * #) arrays and POINTER(c_long).
@@ -104,6 +104,8 @@ def c_ndarray(a, dtype = None, ndim = None, shape = None, requirements = None):
     ndarrayInterface.shape = (C.c_long * array.ndim)(*array.shape)
     ndarrayInterface.strides = (C.c_long * array.ndim)(*array.strides)
     for n in range(array.ndim):
-        ndarrayInterface.strides[n] /= array.dtype.itemsize
+        ndarrayInterface.strides[n] = (
+                ndarrayInterface.strides[n] // array.dtype.itemsize
+        )
 
     return ndarrayInterface
